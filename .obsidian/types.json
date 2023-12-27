@@ -1,0 +1,15 @@
+{
+  "types": {
+    "aliases": "aliases",
+    "cssclasses": "multitext",
+    "tags": "tags",
+    "书名": "text",
+    "状态": "multitext",
+    "": "multitext",
+    "读完日期": "date",
+    "类型": "multitext",
+    "是否重读": "multitext",
+    "评分": "multitext",
+    "创作时间": "text"
+  }
+}
