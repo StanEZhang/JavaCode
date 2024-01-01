@@ -32,9 +32,7 @@
 
 老规矩，在学习切面面编程之前要有前置知识：
 
-[[动态代理]]
-
-[[注解]]
+[[终于搞懂动态代理了！]]
 
 # 目标
 
@@ -116,13 +114,189 @@ AOP作为Spring的左膀右臂之一，自然对这部分加以简化。
 
 ## 编写代码
 
-编写这部分代码也是
+编写这部分代码的逻辑也是非常符合我们的认知逻辑的。
+
+我们前边已经说清楚AOP是做什么的了。
+
+那我们编写代码就要做3件事：
+
+- 公平
+- 公平
+- 还是他妈的公平
+
+不对，再来：
+
+- 抽离出功能模块——定义切面
+- 确认功能代码加在哪——定义切点
+- 确认功能代码什么时候执行——选择通知类型
+
+
+
+我们先把controller给出来：
+
+```java
+@RestController
+public class AopController {
+
+    @RequestMapping("/hello")
+    public String sayHello(){
+        System.out.println("hello");
+        return "hello";
+    }
+}
+```
 
 ### 定义一个切面
 
+先随便写个类。
+
+然后就直接一个@Aspect就行了，那这个类就是一个切面类。
+
+还要再加一个@Component将该类纳入Ioc容器。
+
+就这么简单，狗来了都会写。
+
+```java
+@Aspect
+@Component
+public class AopAdvice {
+}
+```
+
 ### 定义一个切点
 
+先随便写一个方法。
+
+然后就直接一个@Pointcut就行了，那这个方法就是一个切点。
+
+还要再加上表达式，让系统知道代码加到什么位置。
+
+```java
+@Aspect
+@Component
+public class AopAdvice {
+
+    @Pointcut("execution (* com.shangguan.aop.controller.*.*(..))")
+    public void test() {
+    }
+}
+
+```
+
+这时候有同学问：
+
+啊这个execution是什么？
+
+里面那又是一坨什么？
+
+根本看不懂。
+
+举报了。
+
+这个我只能说，这是固定的表达式，是规定。
+
+规定什么？
+
+**看规定之前先记住：表达式一定从右往左匹配**
+
+**看规定之前先记住：表达式一定从右往左匹配**
+
+**看规定之前先记住：表达式一定从右往左匹配**
+
+```text
+execution(访问修饰符(可省略) 方法返回值 包名.类名.方法名(参数))
+参数： ..代表任何参数
+方法： *代表任何方法
+类名： *代表所有类
+包名： *代表所有包 ..代表子孙包
+返回值： *代表所有类型返回值
+```
+
+具体的写法实际五花八门，而且除了execution还有一大堆，为了不让大脑过度疲劳，我们一次只有一个目标：
+
+会用，但不精通。
+
 ### 选择通知类型
+
+下面就是通知类型5种，前3种比较常用：
+
+- 前置通知（@Before）：在目标方法调用之前调用通知
+
+- 后置通知（@After）：在目标方法完成之后调用通知
+
+- 环绕通知（@Around）：在被通知的方法调用之前和调用之后执行自定义的方法
+
+- 返回通知（@AfterReturning）：在目标方法成功执行之后调用通知
+
+- 异常通知（@AfterThrowing）：在目标方法抛出异常之后调用通知
+
+代码如下：
+
+```java
+@Aspect
+@Component
+public class AopAdvice {
+
+    @Pointcut("execution (* com.shangguan.aop.controller.*.*(..))")
+    public void test() {
+
+    }
+
+    @Before("test()")
+    public void beforeAdvice() {
+        System.out.println("beforeAdvice...");
+    }
+
+    @After("test()")
+    public void afterAdvice() {
+        System.out.println("afterAdvice...");
+    }
+
+    @Around("test()")
+    public void aroundAdvice(ProceedingJoinPoint joinPoint) {
+        System.out.println("before");
+        try {
+            joinPoint.proceed();
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+        System.out.println("after");
+    }
+}
+```
+
+从以上代码中可以看出，@Before和@After都已经简单到不能再简单了。
+
+我们需要说一下这个@Around。
+
+joinPoint.proceed()行代码我们就理解为我们需要增强的那个方法的替身就行了。
+
+这也不是想说的，这里我们主要讲一下ProceedingJoinPoint joinPoint这个参数。
+
+ProceedingJoinPoint是一个接口，也就是说这里实际是使用了多态，这不重要。
+
+ProceedingJoinPoint继承了JoinPoint这个接口。
+
+这个JoinPoint有2个方法是我们需要说的。
+
+```java
+Object getTarget();
+Signature getSignature();
+```
+
+**`getTarget()` 方法返回的是目标对象，即那个被增强方法所属的对象实例。**
+
+**`getSignature()` 方法返回的是连接点的签名，即关于被调用的方法（或访问的字段等）的静态信息，如方法名、返回类型、参数类型等。**
+
+那么通过这2个方法，就能获取到所有的对象信息和方法信息，那么能做的事就太多了。
+
+可以移步到这篇文章看看具体是怎么回事，还能学一学结合自定义注解实现AOP。
+
+什么？
+
+你不会自定义注解？
+
+[[自定义注解]]
 
 ## 测试
 
