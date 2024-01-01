@@ -269,7 +269,7 @@ public class AopAdvice {
 
 我们需要说一下这个@Around。
 
-joinPoint.proceed()行代码我们就理解为我们需要增强的那个方法的替身就行了。
+joinPoint.proceed()这行代码我们就理解为我们需要增强的那个方法的替身就行了。
 
 这也不是想说的，这里我们主要讲一下ProceedingJoinPoint joinPoint这个参数。
 
@@ -292,16 +292,35 @@ Signature getSignature();
 
 可以移步到这篇文章看看具体是怎么回事，还能学一学结合自定义注解实现AOP。
 
+[[SpringBoot实现动态数据源配置]]
+
 什么？
 
 你不会自定义注解？
 
-[[自定义注解]]
+[[Java注解，看完就会用]]
 
 ## 测试
 
+启动项目，浏览器访问：
+
+```text
+http://localhost:8080/hello
+```
+
+运行结果：
+
+```text
+before
+beforeAdvice...
+hello
+afterAdvice...
+after
+```
 
 
-还有一种结合自定义注解实现AOP的方式，更拉风，来练练手。
 
-[[SpringBoot实现动态数据源配置]]
+---
+
+联系我：
+https://stanezhang.github.io/
