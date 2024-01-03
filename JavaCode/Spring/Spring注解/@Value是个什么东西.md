@@ -152,3 +152,7 @@ class DemoApplicationTests {
 
 以上就是对 @Value 的简单介绍，其实@Value还有许多高级用法，本篇不再深入。
 
+---
+
+联系我：
+https://stanezhang.github.io/
