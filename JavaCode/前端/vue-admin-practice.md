@@ -1281,9 +1281,123 @@ getData().then(({data}) =>{
 npm i echarts@5.1.2
 ```
 
-import echarts
+import echarts，一定不要落下引号
 
 ```
-
+import * as echarts from 'echarts'
 ```
 
+创建一个容器
+
+```
+<div ref="echarts1" style="height: 280px;"></div>
+```
+
+`ref="echarts1"` 是一个属性，通常用于为这个特定的 `div` 元素指定一个参考标识（reference identifier)
+
+
+
+```js
+// 基于准备好的dom，初始化echarts实例
+const echarts1 = echarts.init(this.$refs.echarts1)
+```
+
+**$refs**: 在 Vue.js 中，`$refs` 是一个对象，它存储了所有带有 `ref` 属性的 DOM 元素。当你在模板中的一个 HTML 元素上使用 `ref="someRefName"` 属性时，你可以通过 `this.$refs.someRefName` 访问到这个元素。它是一种直接从 JavaScript 访问 DOM 元素的方法。
+
+
+
+下面就是按照echarts的demo一个一个数据填进去就差不多了。
+
+第一步echarts.init
+
+第二步填充option数据
+
+x轴、y轴、图例、series
+
+重点说一下series：
+
+```
+在 ECharts 中，series 是一个数组，其中的每个对象代表图表中的一个系列。每个系列可以独立配置，包括系列的类型、名称、数据等。在你的代码示例中，series 定义了一个系列，具体如下：
+name: 这个属性为系列命名，这里的名称是 '销量'。它通常用于图例和工具提示中，用于识别不同的数据系列。
+type: 定义了图表的类型。这里使用的是 'bar'，表示这是一个条形图系列。
+data: 提供了系列的具体数据。这里的数据是 [5, 20, 36, 10, 10, 20]，表示每个类别（比如 '衬衫', '羊毛衫' 等）的销量数据。
+```
+
+第三步echarts1.setOption
+
+```js
+// 基于准备好的dom，初始化echarts实例
+const echarts1 = echarts.init(this.$refs.echarts1)
+// 指定图表的配置项和数据
+var echarts1Option = {}
+// 处理数据xAxis x轴
+const { orderData } = data.data
+const xAxis = Object.keys(orderData.data[0])
+
+const xAxisData = {
+    data: xAxis
+}
+echarts1Option.xAxis = xAxisData
+// 处理y轴
+echarts1Option.yAxis = {}
+//处理图例
+echarts1Option.legend = xAxisData
+
+// 处理series
+echarts1Option.series = []
+xAxis.forEach((key) => {
+    echarts1Option.series.push({
+        name: key,
+        type: "line",
+        // 这个data是最难的
+        data: orderData.data.map((item) => item[key]),
+    })
+})
+// 使用刚指定的配置项和数据显示图表。
+echarts1.setOption(echarts1Option)
+```
+
+重点记一下这段代码的含义：
+
+```js
+xAxis.forEach((key) => {
+    echarts1Option.series.push({
+        name: key,
+        type: "line",
+        // 这个data是最难的
+        data: orderData.data.map((item) => item[key]),
+    })
+})
+```
+
+遍历这个xAxis数组，里面都是苹果、小米这些字符串
+
+遍历中把每个苹果小米系列push到series数组中，每个元素都是一个表格系列
+
+name和type就不说了，都很简单
+
+这个data是什么？在demo中data是从左到右一系列柱状图的数据[5, 20, 36, 10, 10, 20]
+
+我们我们line类型的表格有多个系列，所以目标就是把苹果系列、小米系列...数据都遍历出来
+
+数据在哪？
+
+在orderData.data里
+
+.map方法是干什么的？
+
+它是一个数组方法，通过某种方法映射，对原数组操作生成一个新数组。
+
+item就是原数组的每个元素，它长这样：{苹果: 3190, vivo: 3905, oppo: 2655, 魅族: 614, 三星: 4546}
+
+这是遍历的数组对象中其中的一个，它是一个对象，也是一个key-value集合。
+
+item[key]表示访问每个item对象中的key属性对应的值，遍历拿出来
+
+然后就变成了map后的新数组[100,200,300,200,400]
+
+遍历过程中，苹果系列得到一个数组，小米系列得到一个数组，最终形成整个的series。
+
+# echarts表格的折线图、饼状图
+
+简单，照抄，省略
