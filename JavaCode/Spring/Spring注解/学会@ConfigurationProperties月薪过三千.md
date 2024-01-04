@@ -1,6 +1,8 @@
 学习 @ConfigurationProperties 之前我们需要一些前置知识点：
 
-@Value是个什么东西
+[[@Value是个什么东西]]
+
+首先明确：**@ConfigurationProperties 是 SpringBoot 注解。**
 
 我们在讲 @Value 时知道了如何将配置文件的属性注入到变量中，废话不多说，直接上代码。
 
@@ -256,3 +258,9 @@ animal.name=Wangcai
 
 
 **还有高手吗？**
+
+
+---
+
+联系我：
+https://stanezhang.github.io/
