@@ -25,7 +25,7 @@ redis.conf可以在github源码文件中找到：https://github.com/redis/redis/
 
 这里暂时用网上找到的用一下，以后再研究具体的配置细节与含义。
 
-允许远程访问，将bind 127.0.0.1注释。
+**允许远程访问，将bind 127.0.0.1注释，protected-mode设置为no**
 
 ```shell
 # bind 192.168.1.100 10.0.0.1
