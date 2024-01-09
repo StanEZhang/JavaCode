@@ -101,3 +101,18 @@ sudo systemctl daemon-reload
 sudo systemctl restart docker
 ```
 
+## 5.卸载Docker
+
+卸载依赖
+
+```shell
+sudo yum remove docker-ce docker-ce-cli containerd.io
+```
+
+删除文件夹
+
+```shell
+sudo rm -rf /var/lib/docker
+sudo rm -rf /var/lib/containerd
+```
+
