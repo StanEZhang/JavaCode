@@ -1,8 +1,14 @@
 # 一、Linux安装nacos
 
+安装nacos之前，安装jdk。
+
+[[Linux安装jdk]]
+
 到github下载nacos最新版。
 
 https://github.com/alibaba/nacos/releases
+
+上传到服务器某路径：/usr/local/src/
 
 解压，进入到bin目录下，编辑startup.cmd，将cluster模式改为standalone模式，然后启动。
 
@@ -38,4 +44,15 @@ common模块添加公共依赖
 </dependency>
 ```
 
-配置
+配置nacos地址
+
+```yaml
+spring:
+  application:
+    name: coupon
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 43.143.198.2:8848
+```
+
