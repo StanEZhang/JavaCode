@@ -64,7 +64,7 @@ mysql:5.7 ：指定用这个镜像来创建运行实例
 # 3.mysql配置文件my.conf
 
 ```shell
-vi /mydata/mysql/conf/my.cnf
+vi /mydata/mysql/conf/my.conf
 ```
 
 
