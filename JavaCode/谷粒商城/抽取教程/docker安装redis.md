@@ -38,7 +38,7 @@ port 6379
 
 tcp-backlog 511
 
-requirepass 000415
+#requirepass 000415
 
 timeout 0
 

@@ -1,4 +1,6 @@
-# 一、Linux安装nacos
+# 一、nacos注册中心
+
+## 1. Linux安装nacos
 
 安装nacos之前，安装jdk。
 
@@ -27,7 +29,7 @@ ip:8848/nacos
 
 默认用户名密码：nacos/nacos
 
-# 二、服务配置
+## 2. 服务配置
 
 common模块添加公共依赖
 
