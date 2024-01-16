@@ -149,9 +149,7 @@ public @interface AutoConfigurationPackage {
 
 **@EnableAutoConfiguration 其实就是2个 @Import 。**
 
-
-
-该注解包含 @Import(AutoConfigurationPackages.Registrar.class)，其功能是将 Registrar 类注册到容器中，其作用是保存一些包路径以便日后的引用。
+@Import(AutoConfigurationPackages.Registrar.class)，其功能是将 Registrar 类注册到容器中，其作用是保存一些包路径以便日后的引用。
 
 ```java
 	static class Registrar implements ImportBeanDefinitionRegistrar, DeterminableImports {
