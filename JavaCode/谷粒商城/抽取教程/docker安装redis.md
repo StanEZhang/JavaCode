@@ -23,6 +23,16 @@ mkdir -p /mydata/redis/data
 
 redis.conf可以在github源码文件中找到：https://github.com/redis/redis/blob/5.0/redis.conf
 
+```shell
+# bind 127.0.0.1 # 这行要注释掉，解除本地连接限制
+protected-mode no # 默认yes，如果设置为yes，则只允许在本机的回环连接，其他机器无法连接。
+daemonize no # 默认no 为不守护进程模式，docker部署不需要改为yes，docker run -d本身就是后台启动，不然会冲突
+requirepass 123456 # 设置密码
+appendonly yes # 持久化
+```
+
+
+
 这里暂时用网上找到的用一下，以后再研究具体的配置细节与含义。
 
 **允许远程访问，将bind 127.0.0.1注释，protected-mode设置为no**
@@ -141,6 +151,7 @@ docker run \
 --restart=always \
 --log-opt max-size=100m \
 --log-opt max-file=2 \
+--requirepass zhb819294zhb. \
 -p 6379:6379 \
 --name redis \
 -v /mydata/redis/redis.conf:/etc/redis/redis.conf \
@@ -180,6 +191,8 @@ docker ps -a |grep redis # 通过docker ps指令查看启动状态，是否成�
 ```shell
 docker logs --since 30m redis
 ```
+
+
 
 # 删除redis容器
 
