@@ -35,7 +35,7 @@ spring:
 
 再次强调：
 
-看明白本篇内容需要前置知识点，尤其是 @Import 注解。
+看明白本篇内容需要前置知识点，尤其是 **@Import** 注解。
 
 
 
@@ -82,7 +82,7 @@ public @interface SpringBootApplication {
 
 ## @SpringBootConfiguration
 
-这个最简单，把头套摘下来，他就是一个普普通通的@Configuration注解包装而成而已，表示当前类是一个配置类。
+这个最简单，把头套摘下来，他就是一个普普通通的 @Configuration 注解包装而成而已，表示当前类是一个配置类。
 
 ```java
 @Target(ElementType.TYPE)
@@ -145,31 +145,41 @@ public @interface AutoConfigurationPackage {
 
 }
 ```
-也就是说：
-
-**@EnableAutoConfiguration 其实就是2个 @Import 。**
-
-@Import(AutoConfigurationPackages.Registrar.class)，其功能是将 Registrar 类注册到容器中，其作用是保存一些包路径以便日后的引用。
+@Import(AutoConfigurationPackages.Registrar.class) 中的 Regisgrar 类如下：
 
 ```java
-	static class Registrar implements ImportBeanDefinitionRegistrar, DeterminableImports {
+static class Registrar implements ImportBeanDefinitionRegistrar, DeterminableImports {
 
-		@Override
-		public void registerBeanDefinitions(AnnotationMetadata metadata,
-				BeanDefinitionRegistry registry) {
-			register(registry, new PackageImport(metadata).getPackageName());
-		}
+    @Override
+    public void registerBeanDefinitions(AnnotationMetadata metadata,
+                                        BeanDefinitionRegistry registry) {
+        register(registry, new PackageImport(metadata).getPackageName());
+    }
 
-		@Override
-		public Set<Object> determineImports(AnnotationMetadata metadata) {
-			return Collections.singleton(new PackageImport(metadata));
-		}
+    @Override
+    public Set<Object> determineImports(AnnotationMetadata metadata) {
+        return Collections.singleton(new PackageImport(metadata));
+    }
 
-	}
+}
 ```
+如果你有去好好看 @Import 注解的那边文章，就会知道这是 **ImportBeanDefinitionRegistrar 接口实现**的方式。
+
+这种方式提供一种手动方式灵活注册 bean。
+
+在这里，我们根据两个提示就可以知道其功能：
+
+- @AutoConfigurationPackage 是自动配置包的意思
+- register(registry, new PackageImport(metadata).getPackageName()); 根据包名注册 bean
+
+总结一下就是：
+
+**根据通过注解提供的元数据，动态地向 Spring 容器中注册特定包中的类作为 beans。**
+
 ### @Import(AutoConfigurationImportSelector.class)
-这个注解我们是见过的，在讲@Import用法的时候。
-该注解将 AutoConfigurationImportSelector 类注册到容器中，目的是批量向容器中注册组件。
+
+
+
 AutoConfigurationImportSelector 实现了 ImportSelector 接口，其中只需实现 selectImports 方法，并以数组的形式返回要导入的类名，即可实现批量注册组件。
 AutoConfigurationImportSelector 类中通过调用 getCandidateConfigurations 方法来获取 Spring Boot 需要自动配置的类名。
 这些类名保存在了META-INF/spring.factories文件中。
