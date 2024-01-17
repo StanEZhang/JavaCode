@@ -176,14 +176,63 @@ static class Registrar implements ImportBeanDefinitionRegistrar, DeterminableImp
 
 **根据通过注解提供的元数据，动态地向 Spring 容器中注册特定包中的类作为 beans。**
 
+
+
 ### @Import(AutoConfigurationImportSelector.class)
 
+AGAIN ！
+
+如果你有去好好看 @Import 注解的那边文章，就会知道这是 **ImportSelector接口实现**的方式。
+
+这种方式只需实现 selectImports 方法，并以**数组**的形式返回要导入的类名，即可实现批量注册组件。
+
+AutoConfigurationImportSelector 类中通过自己的源码实现了如下一个功能：
+
+**把 spring-boot-autoconfigure 依赖中 META-INF/spring.factories 文件中需要自动配置的类名读取到数组中。**
+
+它长这个样子：
+
+```properties
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.springframework.boot.autoconfigure.admin.SpringApplicationAdminJmxAutoConfiguration,\
+org.springframework.boot.autoconfigure.aop.AopAutoConfiguration,\
+org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration,\
+org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration,\
+org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration,\
+org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration,\
+...
+```
+
+那它到底怎么读的？
+
+这里我们不讨论具体实现，**有兴趣**且**有实力**的可以扒源码自己看一下。
+
+当然这些类不会全部都用到，经过筛选，**去除重复、去除相应功能模块未开启的配置类、去除人为exclude掉的**，将剩余的最终配置类全类名String数组返回。
 
 
-AutoConfigurationImportSelector 实现了 ImportSelector 接口，其中只需实现 selectImports 方法，并以数组的形式返回要导入的类名，即可实现批量注册组件。
-AutoConfigurationImportSelector 类中通过调用 getCandidateConfigurations 方法来获取 Spring Boot 需要自动配置的类名。
-这些类名保存在了META-INF/spring.factories文件中。
-![[Pasted image 20240116142250.png]]
-当然这些类不会全部都用到，经过筛选，去除重复、去除相应功能模块未开启的配置类、去除人为exclude掉的，将剩余的最终配置类全类名String数组返回。
+
+最后我们再来回收一下开始的那个问题。
+
+**我们在 SpringBoot 开发中，就写了几个配置，怎么连接上的数据库？**
+
+我们简单捋一下：
+
+SpringBoot 启动。
+
+@SpringBootApplication 注解生效。
+
+@EnableAutoConfiguration 注解生效。
+
+@Import(AutoConfigurationImportSelector.class) 注解生效。
+
+读取到了org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration。
+
+注册一个数据源bean。
+
+读取到 xml 的数据源配置。
+
+大功告成！
+
 
 
