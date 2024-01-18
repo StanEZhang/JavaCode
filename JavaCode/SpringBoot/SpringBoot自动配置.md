@@ -31,7 +31,7 @@ spring:
     password: root
 ```
 
-在新手村时期，我们照着教程生搬硬抄的时候可能也想过这个问题，今天就来简单探究一下。、
+在新手村时期，我们照着教程生搬硬抄的时候可能也想过这个问题，今天就来简单探究一下。
 
 再次强调：
 
@@ -180,8 +180,6 @@ static class Registrar implements ImportBeanDefinitionRegistrar, DeterminableImp
 
 ### @Import(AutoConfigurationImportSelector.class)
 
-AGAIN ！
-
 如果你有去好好看 @Import 注解的那边文章，就会知道这是 **ImportSelector接口实现**的方式。
 
 这种方式只需实现 selectImports 方法，并以**数组**的形式返回要导入的类名，即可实现批量注册组件。
@@ -204,7 +202,7 @@ org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration,\
 ...
 ```
 
-那它到底怎么读的？
+那它到底怎么读取的？
 
 这里我们不讨论具体实现，**有兴趣**且**有实力**的可以扒源码自己看一下。
 
