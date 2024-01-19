@@ -10,9 +10,9 @@
 
 https://github.com/alibaba/nacos/releases
 
-上传到服务器某路径：/usr/local/src/
+上传到服务器某路径：/usr/local/nacos/
 
-解压，进入到bin目录下，编辑startup.cmd，将cluster模式改为standalone模式，然后启动。
+解压，进入到bin目录下，编辑startup.sh，将cluster模式改为standalone模式，然后启动。
 
 ```shell
 tar -xzvf 包名

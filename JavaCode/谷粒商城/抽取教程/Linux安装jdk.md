@@ -18,13 +18,13 @@ https://www.oracle.com/java/technologies/downloads/#java8
 
 # 三、上传jdk安装到linux服务器
 
-这里我是用的是FinalShell直接拖动进来即可，路径为/opt目录
+这里我是用的是FinalShell直接拖动进来即可，路径为/usr/local/java目录
 
 # 四、解压jdk
 
 ```shell
-# 进入/opt
-cd /opt
+# 进入/usr/local/java
+cd /usr/local/java
 ls
 tar -xvf jdk-8u341-linux-x64.tar.gz
 ```
@@ -38,7 +38,7 @@ vim /etc/profile
 用vim /etc/profile进入文件，按i进入编辑状态，加入下边这段配置，esc退出编辑，:wq保存退出。
 
 ```shell
-export JAVA_HOME=/opt/jdk1.8.0_341
+export JAVA_HOME=/usr/local/java/jdk1.8.0_341
 export PATH=$JAVA_HOME/bin:$PATH
 export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 ```
