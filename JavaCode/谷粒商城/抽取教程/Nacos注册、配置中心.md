@@ -76,6 +76,8 @@ public class CouponApplication {
 </dependency>
 ```
 
+**注意：以下配置需要放在bootstrap.yml配置文件中**
+
 ```yaml
 spring:
   cloud:
@@ -83,6 +85,8 @@ spring:
       config:
         server-addr: 43.143.198.2:8848
 ```
+
+
 
 创建配置，默认命名规则为：应用名.properties
 
