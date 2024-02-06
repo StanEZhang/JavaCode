@@ -191,3 +191,173 @@ localhost:9002/category/list/tree
 
 # 配置网关路由与路径重写
 
+登录人人后台管理系统
+
+新增一级目录-商品系统
+
+新增菜单-分类维护，url:product/category
+
+人人后台管理系统中，views/modules文件下sys下有role.vue,所以创建新页面就按照这种格式。
+
+比如product/category页面，就在views/modules/product/category.vue
+
+使用vue模板快速生成vue文件
+
+插入elementui树形组件,删除写死的data数据。
+
+```vue
+<template>
+<el-tree :data="data" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
+</template>
+
+<script>
+ export default {
+    data() {
+      return {
+        data: [],
+        defaultProps: {
+          children: 'children',
+          label: 'label'
+        }
+      };
+    },
+    methods: {
+      handleNodeClick(data) {
+        console.log(data);
+      }
+    }
+  };
+</script>
+
+<style lang="scss" scoped>
+
+</style>
+```
+
+仿照其他页面请求写获取菜单数据请求：
+
+```js
+methods: {
+    handleNodeClick(data) {
+      console.log(data);
+    },
+    // 获取菜单数据
+    getMenus() {
+      this.$http({
+        url: this.$http.adornUrl("/product/category/list/tree"),
+        method: "get"
+      }).then(({ data }) => {
+        console.log("成功获取到菜单数据...", data);
+      });
+    }
+  },
+  created() {
+    this.getMenus();
+  }
+```
+
+到前端页面发现报错404：
+
+```
+http://localhost:8080/renren-fast/product/category/list/tree
+```
+
+问题如下：
+
+1. product模块端口号9002，不应该向8080发送请求
+2. 也不应该向9002发送，应该向网关发送请求
+
+所以全局查找这个localhost:8080/renren-fast，修改localhost:88
+
+修改后还会有问题，因为验证码请求直接发送到88端口，网关哪里有什么验证码接口，所以报错。
+
+```
+http://localhost:88/captcha.jpg?uuid=7e324c03-fcff-4510-8ae9-3ec006f802a3
+```
+
+怎么办？
+
+将renrenfast注册到nacos,这一步比较简单，不细说了。
+
+
+
+网关配置路由规则：
+
+```yaml
+spring:
+  # 服务名称
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      routes:
+      - id: route_renren_fast
+        uri: lb://renren-fast
+        predicates:
+          - Path=/api/**
+```
+
+前端也加上api:http://localhost:88/api
+
+最终验证码请求为:http://localhost:88/api/captcha.jpg?uuid=d05cca9d-8abb-43b9-8510-c41b7938cf37
+
+还是404
+
+为什么？
+
+前端发送：localhost:88/api/captcha.jpg，到网关，网关根据路由规则转发到：renren-fast:8080/api/captcha.jpg
+
+但是实际之前的验证码请求为:renren-fast:8080/renren-fast/captcha.jpg,也就是说多个api,得想办法把api截去。
+
+这里老师提到一个`server.servlet.context-path`配置：/renren-fast
+
+`server.servlet.context-path` 是 Spring Boot 应用中的一个配置项，用于设置应用的上下文路径（Context Path）。上下文路径是应用在 URL 中的基础路径。更改上下文路径意味着你的应用的所有路由都将以这个基础路径为前缀。
+
+如何截去api?使用路径重写：
+
+```yaml
+spring:
+  # 服务名称
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      routes:
+      - id: route_renren_fast
+        uri: lb://renren-fast
+        predicates:
+          - Path=/api/**
+        filters:
+          # 路径重写，之前的路由规则都未生效时就转发给/renren-fast进行处理
+          - RewritePath=/api(?<segment>/?.*), /renren-fast/$\{segment}
+```
+
+启动gateway报错：
+
+```
+Description:
+
+Parameter 0 of method modifyRequestBodyGatewayFilterFactory in org.springframework.cloud.gateway.config.GatewayAutoConfiguration required a bean of type 'org.springframework.http.codec.ServerCodecConfigurer' that could not be found.
+
+Action:
+Consider defining a bean of type 'org.springframework.http.codec.ServerCodecConfigurer' in your configuration.
+```
+
+解决：
+
+删除web依赖：
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+```
+
+此时验证码正常，继续登录，报错CORS：
+
+```
+Access to XMLHttpRequest at 'http://localhost:88/api/sys/login' from origin 'http://localhost:8001' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+```
+
+# 网关统一配置跨域
