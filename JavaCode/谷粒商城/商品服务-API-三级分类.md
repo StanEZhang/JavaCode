@@ -361,3 +361,70 @@ Access to XMLHttpRequest at 'http://localhost:88/api/sys/login' from origin 'htt
 ```
 
 # 网关统一配置跨域
+[[什么是跨域]]
+启动网关、Product、Renren模块，启动前端。
+
+【bug】
+
+启动Product时候，报错了，原因是我把common包里的`spring-boot-starter-web`依赖删掉了，导致Product模块里没有web包，所以连接nacos失败，启动不起来。
+
+【登录报错】
+
+```
+:8001/#/:1 Access to XMLHttpRequest at 'http://localhost:88/api/sys/menu/nav?t=1708422545895' from origin 'http://localhost:8001' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+```
+
+在网关添加配置：
+
+```java
+@Configuration
+public class GulimallCorsConfiguration {
+
+    /**
+     * 非一般请求会先发送optional请求进行跨域试探
+     * 利用过滤器对其回应允许跨域
+     * @return
+     */
+    @Bean
+    public CorsWebFilter corsWebFilter() {
+        UrlBasedCorsConfigurationSource configurationSource = new UrlBasedCorsConfigurationSource();
+
+        // corsConfiguration 处理策略
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        // 注意这里调用的是add方法
+        // 允许所有请求头
+        corsConfiguration.addAllowedHeader("*");
+        // 允许所有来源
+        corsConfiguration.addAllowedOrigin("*");
+        // 允许所有请求方法
+        corsConfiguration.addAllowedMethod("*");
+        // 允许携带coolie
+        corsConfiguration.setAllowCredentials(true);
+
+        // path 要对哪些请求进行跨域处理；corsConfiguration 处理策略
+        configurationSource.registerCorsConfiguration("/**", corsConfiguration);
+
+        // 创建过滤器
+        return new CorsWebFilter(configurationSource);
+    }
+}
+```
+
+注释renren模块的重复配置：
+
+```java
+@Configuration
+public class CorsConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+            .allowedOrigins("*")
+            .allowCredentials(true)
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            .maxAge(3600);
+    }
+}
+```
+
+# 查询-树形展示三级分类数据
