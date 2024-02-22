@@ -428,3 +428,670 @@ public class CorsConfig implements WebMvcConfigurer {
 ```
 
 # 查询-树形展示三级分类数据
+
+product路由配置：
+
+```yaml
+    gateway:
+      routes:
+      # 路由到商品管理模块
+      - id: route_gulimall_product
+        uri: lb://product
+        predicates:
+          # 根据请求路径路由
+          - Path=/api/product/**
+        filters:
+          # 路径重写
+          # 移除了 /api
+          - RewritePath=/api(?<segment>/?.*), $\{segment}
+```
+
+注意！！！！！
+
+路由是有先后路有顺序的，如果前边的断言匹配上了，就不往后走了，所以注意调整！
+
+越精确的越往前放，越模糊的往后放！ 	
+
+前端修改：
+
+```js
+// 赋值
+this.menus = data.data
+
+// label 改为name
+label: "name"
+```
+
+# 删除-页面效果
+
+alt + shift + F 整理代码
+
+```vue
+<template>
+  <!-- expand-on-click-node	是否在点击节点的时候展开或者收缩节点， 默认值为 true，如果为 false，则只有点箭头图标的时候才会展开或者收缩节点。 -->
+  <!-- show-checkbox 节点是否可选择 -->
+  <!-- node-key="catId" 节点唯一id -->
+  <el-tree
+    :data="menus"
+    :props="defaultProps"
+    :expand-on-click-node="false"
+    show-checkbox
+    node-key="catId"
+  >
+    <span class="custom-tree-node" slot-scope="{ node, data }">
+      <span>{{ node.label }}</span>
+      <span>
+        <el-button v-if="node.level <= 2" type="text" size="mini" @click="() => append(data)">
+          Append
+        </el-button>
+        <el-button v-if="node.childNodes.length == 0" type="text" size="mini" @click="() => remove(node, data)">
+          Delete
+        </el-button>
+      </span>
+    </span>
+  </el-tree>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      menus: [],
+      defaultProps: {
+        children: "children",
+        label: "name"
+      }
+    };
+  },
+  methods: {
+    append(data) {
+      console.log("append", data);
+    },
+
+    remove(node, data) {
+      console.log("remove", node, data);
+    },
+    // 获取菜单数据
+    getMenus() {
+      this.$http({
+        url: this.$http.adornUrl("/product/category/list/tree"),
+        method: "get"
+      }).then(({ data }) => {
+        console.log("成功获取到菜单数据...", data.data);
+        this.menus = data.data;
+      });
+    }
+  },
+  created() {
+    this.getMenus();
+  }
+};
+</script>
+
+<style lang="scss" scoped></style>
+
+```
+
+# 删除-逻辑删除
+
+MyBatisPlus逻辑删除文档：https://baomidou.com/pages/6b03c5/#%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95
+
+# 删除-删除效果细化
+
+```vue
+<template>
+  <!-- expand-on-click-node	是否在点击节点的时候展开或者收缩节点， 默认值为 true，如果为 false，则只有点箭头图标的时候才会展开或者收缩节点。 -->
+  <!-- show-checkbox 节点是否可选择 -->
+  <!-- node-key="catId" 节点唯一id -->
+  <el-tree
+    :data="menus"
+    :props="defaultProps"
+    :expand-on-click-node="false"
+    show-checkbox
+    node-key="catId"
+    :default-expanded-keys="expandedKeys"
+  >
+    <span class="custom-tree-node" slot-scope="{ node, data }">
+      <span>{{ node.label }}</span>
+      <span>
+        <el-button
+          v-if="node.level <= 2"
+          type="text"
+          size="mini"
+          @click="() => append(data)"
+        >
+          Append
+        </el-button>
+        <el-button
+          v-if="node.childNodes.length == 0"
+          type="text"
+          size="mini"
+          @click="() => remove(node, data)"
+        >
+          Delete
+        </el-button>
+      </span>
+    </span>
+  </el-tree>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      // 默认要展开的节点
+      expandedKeys: [],
+      menus: [],
+      defaultProps: {
+        children: "children",
+        label: "name"
+      }
+    };
+  },
+  methods: {
+    append(data) {
+      console.log("append", data);
+    },
+
+    remove(node, data) {
+      console.log("remove-->", node, data);
+      // 弹出确认提示框
+      // 点击确定后发送删除请求
+      // 删除成功后弹出提示信息
+      // 重新从后端获取菜单列表
+      // 自动展开父级菜单
+      // 注意此处的反引号
+      this.$confirm(`是否删除【${data.name}】菜单项?`, "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+        //   点击确定
+      })
+        .then(() => {
+          let ids = [data.catId];
+          console.log(data.catId);
+          // 发送httppost请求，进行删除
+          this.$http({
+            url: this.$http.adornUrl("/product/category/delete"),
+            method: "post",
+            data: this.$http.adornData(ids, false)
+          }).then(({ data }) => {
+            // 删除成功弹出提示框
+            this.$message({
+              type: "success",
+              message: "删除成功!"
+            });
+            // 重新获取菜单列表
+            this.getMenus();
+            // 展开父级菜单
+            this.expandedKeys = [node.parent.data.catId];
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
+        });
+    },
+    // 获取菜单数据
+    getMenus() {
+      this.$http({
+        url: this.$http.adornUrl("/product/category/list/tree"),
+        method: "get"
+      }).then(({ data }) => {
+        console.log("成功获取到菜单数据...", data.data);
+        this.menus = data.data;
+      });
+    }
+  },
+  created() {
+    this.getMenus();
+  }
+};
+</script>
+
+<style lang="scss" scoped></style>
+
+```
+
+# 新增-新增效果完成
+
+对话框：https://element.eleme.cn/#/zh-CN/component/dialog
+
+```vue
+<template>
+  <div>
+    <!-- expand-on-click-node	是否在点击节点的时候展开或者收缩节点， 默认值为 true，如果为 false，则只有点箭头图标的时候才会展开或者收缩节点。 -->
+    <!-- show-checkbox 节点是否可选择 -->
+    <!-- node-key="catId" 节点唯一id -->
+    <el-tree
+      :data="menus"
+      :props="defaultProps"
+      :expand-on-click-node="false"
+      show-checkbox
+      node-key="catId"
+      :default-expanded-keys="expandedKeys"
+    >
+      <span class="custom-tree-node" slot-scope="{ node, data }">
+        <span>{{ node.label }}</span>
+        <span>
+          <el-button
+            v-if="node.level <= 2"
+            type="text"
+            size="mini"
+            @click="() => append(data)"
+          >
+            Append
+          </el-button>
+          <el-button
+            v-if="node.childNodes.length == 0"
+            type="text"
+            size="mini"
+            @click="() => remove(node, data)"
+          >
+            Delete
+          </el-button>
+        </span>
+      </span>
+    </el-tree>
+
+    <!-- 新增菜单弹出对话框 -->
+    <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
+      <el-form :model="category">
+        <el-form-item label="分类名称">
+          <el-input v-model="category.name" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addCategory"
+          >确 定</el-button
+        >
+      </span>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      // 默认要展开的节点
+      expandedKeys: [],
+      menus: [],
+      defaultProps: {
+        children: "children",
+        label: "name"
+      },
+      // 是否显示对话框
+      dialogVisible: false,
+      category: {
+        // catId由数据库自己生成
+        catId: null,
+        name: "",
+        parentCid: 0,
+        catLevel: 0,
+        showStatus: 1,
+        icon: "",
+        productUnit: "",
+        sort: 0
+      }
+    };
+  },
+  methods: {
+    // 在表单数据准备好后发起post请求添加菜单
+    addCategory() {
+      // 发起httppost请求，将表单数据提交到后台
+      this.$http({
+        url: this.$http.adornUrl("/product/category/save"),
+        method: "post",
+        data: this.$http.adornData(this.category, false),
+      }).then(({ data }) => {
+        // 弹出消息提示框
+        // 删除成功弹出提示框
+        this.$message({
+          type: "success",
+          message: "添加成功!",
+        });
+        // 关闭对话框
+        this.dialogVisible = false;
+        // 重新获取全部菜单列表
+        this.getMenus();
+        // 设置默认展开的菜单节点(自己)
+        this.expandedKeys = [this.category.parentCid];
+      });
+    },
+    append(data) {
+      console.log("append", data);
+      // 弹出填写框
+      this.dialogVisible = true;
+      // 为表单对象复制，name属性是双向绑定，不用手动赋值
+      this.category.parentCid = data.catId;
+      // *1 可以自动转型
+      this.category.catLevel = data.catLevel * 1 + 1;
+    },
+
+    remove(node, data) {
+      console.log("remove-->", node, data);
+      // 弹出确认提示框
+      // 点击确定后发送删除请求
+      // 删除成功后弹出提示信息
+      // 重新从后端获取菜单列表
+      // 自动展开父级菜单
+      // 注意此处的反引号
+      this.$confirm(`是否删除【${data.name}】菜单项?`, "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+        //   点击确定
+      })
+        .then(() => {
+          let ids = [data.catId];
+          console.log(data.catId);
+          // 发送httppost请求，进行删除
+          this.$http({
+            url: this.$http.adornUrl("/product/category/delete"),
+            method: "post",
+            data: this.$http.adornData(ids, false)
+          }).then(({ data }) => {
+            // 删除成功弹出提示框
+            this.$message({
+              type: "success",
+              message: "删除成功!"
+            });
+            // 重新获取菜单列表
+            this.getMenus();
+            // 展开父级菜单
+            this.expandedKeys = [node.parent.data.catId];
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
+        });
+    },
+    // 获取菜单数据
+    getMenus() {
+      this.$http({
+        url: this.$http.adornUrl("/product/category/list/tree"),
+        method: "get"
+      }).then(({ data }) => {
+        console.log("成功获取到菜单数据...", data.data);
+        this.menus = data.data;
+      });
+    }
+  },
+  created() {
+    this.getMenus();
+  }
+};
+</script>
+
+<style lang="scss" scoped></style>
+
+```
+
+
+
+# P53.修改-基本修改效果完成
+
+```vue
+<template>
+  <div>
+    <!-- expand-on-click-node	是否在点击节点的时候展开或者收缩节点， 默认值为 true，如果为 false，则只有点箭头图标的时候才会展开或者收缩节点。 -->
+    <!-- show-checkbox 节点是否可选择 -->
+    <!-- node-key="catId" 节点唯一id -->
+    <el-tree
+      :data="menus"
+      :props="defaultProps"
+      :expand-on-click-node="false"
+      show-checkbox
+      node-key="catId"
+      :default-expanded-keys="expandedKeys"
+    >
+      <span class="custom-tree-node" slot-scope="{ node, data }">
+        <span>{{ node.label }}</span>
+        <span>
+          <el-button
+            v-if="node.level <= 2"
+            type="text"
+            size="mini"
+            @click="() => append(data)"
+          >
+            Append
+          </el-button>
+
+          <el-button type="text" size="mini" @click="() => edit(node, data)">
+            Edit
+          </el-button>
+
+          <el-button
+            v-if="node.childNodes.length == 0"
+            type="text"
+            size="mini"
+            @click="() => remove(node, data)"
+          >
+            Delete
+          </el-button>
+        </span>
+      </span>
+    </el-tree>
+
+    <!-- 新增菜单弹出对话框 -->
+    <el-dialog
+      :title="title"
+      :visible.sync="dialogVisible"
+      width="30%"
+      :close-on-click-modal="false"
+      :show-close="false"
+    >
+      <el-form :model="category">
+        <el-form-item label="分类名称">
+          <el-input v-model="category.name" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="菜单图标">
+          <el-input v-model="category.icon" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="计量单位">
+          <el-input
+            v-model="category.productUnit"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitData()">确 定</el-button>
+      </span>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      title: "",
+      // 默认要展开的节点
+      expandedKeys: [],
+      menus: [],
+      defaultProps: {
+        children: "children",
+        label: "name"
+      },
+      // 是否显示对话框
+      dialogVisible: false,
+      category: {
+        // catId由数据库自己生成
+        catId: null,
+        name: "",
+        parentCid: 0,
+        catLevel: 0,
+        showStatus: 1,
+        icon: "",
+        productUnit: "",
+        sort: 0
+      },
+      // 添加和修改共用一个对话框，需要一个变量来区别点击确定时进行添加还是修改操作
+      dialogType: ""
+    };
+  },
+  methods: {
+    submitData() {
+      if (this.dialogType == "add") {
+        this.addCategory();
+      }
+      if (this.dialogType == "edit") {
+        this.editCategory();
+      }
+    },
+    editCategory() {
+      var { catId, name, icon, productUnit } = this.category;
+      this.$http({
+        url: this.$http.adornUrl("/product/category/update"),
+        method: "post",
+        data: this.$http.adornData({ catId, name, icon, productUnit }, false)
+      }).then(({ data }) => {
+        // 修改成功弹出提示框
+        this.$message({
+          type: "success",
+          message: "修改成功!"
+        });
+        // 关闭对话框
+        this.dialogVisible = false;
+        // 重新获取全部菜单列表
+        this.getMenus();
+        // 设置默认展开的菜单节点(自己)
+        this.expandedKeys = [this.category.parentCid];
+      });
+    },
+    // 在表单数据准备好后发起post请求添加菜单
+    addCategory() {
+      // 发起httppost请求，将表单数据提交到后台
+      this.$http({
+        url: this.$http.adornUrl("/product/category/save"),
+        method: "post",
+        data: this.$http.adornData(this.category, false)
+      }).then(({ data }) => {
+        // 弹出消息提示框
+        // 删除成功弹出提示框
+        this.$message({
+          type: "success",
+          message: "添加成功!"
+        });
+        // 关闭对话框
+        this.dialogVisible = false;
+        // 重新获取全部菜单列表
+        this.getMenus();
+        // 设置默认展开的菜单节点(自己)
+        this.expandedKeys = [this.category.parentCid];
+      });
+    },
+    append(data) {
+      console.log("append", data);
+      // 弹出填写框
+      this.dialogVisible = true;
+      // 对话框标题
+      this.title = "添加菜单";
+      // 设置当前是添加操作
+      this.dialogType = "add";
+      // 为表单对象复制，name属性是双向绑定，不用手动赋值
+      this.category.parentCid = data.catId;
+      // *1 可以自动转型
+      this.category.catId = null;
+      this.category.name = "";
+      this.category.icon = "";
+      this.category.productUnit = "";
+      this.category.sort = 0;
+      this.category.showStatus = 1;
+    },
+    edit(node, data) {
+      console.log("edit-->", data);
+      // 弹出对话框
+      this.dialogVisible = true;
+      // 回显
+      // 当前菜单(节点)的数据回显(表单绑定的是category对象，我们需要去数据库重新获取它，防止缓存)
+      this.$http({
+        url: this.$http.adornUrl("/product/category/info/" + data.catId),
+        method: "get"
+      }).then(({ data }) => {
+        console.log("最新的category", data);
+        // // 把最新数据赋值给表单对象
+        // this.category = data.category;
+        this.category.name = data.data.name;
+        this.category.catId = data.data.catId;
+        this.category.icon = data.data.icon;
+        this.category.productUnit = data.data.productUnit;
+        this.category.parentCid = data.data.parentCid;
+      });
+      // 设置当前是添加操作
+      this.dialogType = "edit";
+      // 设置对话框显示标题
+      this.title = "修改菜单";
+    },
+    remove(node, data) {
+      console.log("remove-->", node, data);
+      // 弹出确认提示框
+      // 点击确定后发送删除请求
+      // 删除成功后弹出提示信息
+      // 重新从后端获取菜单列表
+      // 自动展开父级菜单
+      // 注意此处的反引号
+      this.$confirm(`是否删除【${data.name}】菜单项?`, "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+        //   点击确定
+      })
+        .then(() => {
+          let ids = [data.catId];
+          console.log(data.catId);
+          // 发送httppost请求，进行删除
+          this.$http({
+            url: this.$http.adornUrl("/product/category/delete"),
+            method: "post",
+            data: this.$http.adornData(ids, false)
+          }).then(({ data }) => {
+            // 删除成功弹出提示框
+            this.$message({
+              type: "success",
+              message: "删除成功!"
+            });
+            // 重新获取菜单列表
+            this.getMenus();
+            // 展开父级菜单
+            this.expandedKeys = [node.parent.data.catId];
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
+        });
+    },
+    // 获取菜单数据
+    getMenus() {
+      this.$http({
+        url: this.$http.adornUrl("/product/category/list/tree"),
+        method: "get"
+      }).then(({ data }) => {
+        console.log("成功获取到菜单数据...", data.data);
+        this.menus = data.data;
+      });
+    }
+  },
+  created() {
+    this.getMenus();
+  }
+};
+</script>
+
+<style lang="scss" scoped></style>
+
+```
+
+# P54-58略
