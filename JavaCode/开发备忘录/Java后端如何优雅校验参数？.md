@@ -90,7 +90,7 @@ public class EmpController {
 
 ## 2. 使用 JSR 303 相关注解处理逻辑
 
-第一步：在相关的 Bean 上标注注解，并写上异常信息。
+### 第一步：在相关的 Bean 上标注注解，并写上异常信息
 
 ```java
 import lombok.Data;
@@ -116,17 +116,11 @@ public class Emp implements Serializable {
 }	
 ```
 
+### 第二步：修改 Controller 方法，使用 @Valid 注解标记需要检测的数据
 
+当检测到数据异常时，会抛出异常。
 
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
-
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428220123345-929168505.png)
-
-Step2：  
-　　修改 Controller 方法，使用 @Valid 注解标记需要检测的数据。
-
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
-
+```java
 @RestController
 @RequestMapping("api")
 public class EmpController {
@@ -138,25 +132,13 @@ public class EmpController {
         return Result.ok().data("items", emp).message("数据插入成功");
     }
 }
+```
 
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
+这里抛出的异常可能不是我们希望看到的异常格式，怎么办呢？
 
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428220154880-625785986.png)
+### 第三步：使用 BindingResult 去处理捕获到的数据并进行相关处理
 
-Step3：  
-　　使用 postman 测试一下。会抛出 MethodArgumentNotValidException 异常。
-
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428220221175-52378368.png)
-
-控制台打印的信息：
-
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428220239354-1151000083.png)
-
-Step4：  
-　　可以使用 BindingResult 去处理捕获到的数据并进行相关处理。
-
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
-
+```java
 @RestController
 @RequestMapping("api")
 public class EmpController {
@@ -180,22 +162,19 @@ public class EmpController {
         return Result.ok().data("items", emp).message("数据插入成功");
     }
 }
+```
 
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
+### 第四步：统一异常处理
 
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428220312723-363439614.png)
+通过上面的步骤，已经可以捕获异常、处理异常。
 
-使用 Postman 测试。
+但是每次都是在业务方法中手动处理逻辑，这样的实现，代码肯定会冗余。
 
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428220426207-803078949.png)
+可以将其抽出，使用**统一异常处理**。
 
-Step5：  
-　　通过上面的步骤，已经可以捕获异常、处理异常，但是每次都是在业务方法中手动处理逻辑，这样的实现，代码肯定会冗余。可以将其抽出，使用 统一异常处理，每次异常发生时，将其捕获。  
-　　根据 Step3 可以看到会抛出 MethodArgumentNotValidException 异常，所以需要将其捕获。  
-　　需要使用 @RestControllerAdvice 与 @ExceptionHandler。
+需要使用 **@RestControllerAdvice** 与 **@ExceptionHandler**。
 
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
-
+```java
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     private Logger logger = LoggerFactory.getLogger(getClass());
@@ -213,15 +192,11 @@ public class GlobalExceptionHandler {
         return Result.error().message("数据校验不合法").data("items", map);
     }
 }
+```
 
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
+这时就不需要再用 BindingResult 去处理数据了。
 
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428220502126-506944985.png)
-
-相应的业务方法里，不需要再用 BindingResult 去处理数据了（即 Step2 的状态）。
-
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
-
+```java
 @RestController
 @RequestMapping("api")
 public class EmpController {
@@ -233,89 +208,63 @@ public class EmpController {
         return Result.ok().data("items", emp).message("数据插入成功");
     }
 }
+```
 
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
 
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428220537352-783807214.png)
-
-使用 Postman 测试。
-
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428220554438-1283001408.png)
 
 ## 3. JSR 303 分组校验
 
-（1）为什么使用 分组校验？  
-　　通过上面的过程，可以了解到单个方法的校验规则。  
-　　如果出现多个方法，都需要校验 Bean，且校验规则不同的时候，怎么办呢？  
-　　分组校验就可以去解决该问题，每个分组指定不同的校验规则，不同的方法执行不同的分组，就可以得到不同的校验结果。
+**为什么使用分组校验？**
 
-（2）基本认识  
-　　JSR 303 的每个注解都默认具备三个属性：  
-　　　　message 用来定义数据校验失败后的提示消息，默认读取配置文件的内容。  
-　　　　　　全局搜索 ValidationMessages.properties，可以看到默认的信息。
+通过上面的过程，可以了解到单个方法的校验规则。 
 
-　　　　groups 用来定义分组，其是一个 class 数组，可以指定多个分组。
+如果出现多个方法，都需要校验 Bean，且校验规则不同的时候，怎么办呢？
 
-String message() default "{javax.validation.constraints.NotNull.message}";
+分组校验就可以去解决该问题.
 
-Class<?>[] groups() default { };
+**每个分组指定不同的校验规则，不同的方法执行不同的分组**，就可以得到不同的校验结果。
 
-Class<? extends Payload>[] payload() default { };
 
-（3）使用分组步骤：  
-Step1：  
-　　定义一个空接口，用于指定分组，内部不需要任何实现。
 
-Step2：  
-　　指定 注解时，通过 groups 指定分组。用于指定在某个分组条件下，才去执行校验规则。
+### 第一步：定义空接口，用于指定分组，内部不需要任何实现
 
-Step3：  
-　　在相关的业务方法上，通过 @Validated 注解指定分组，去指定校验。  
-注：  
-　　使用分组校验后，Bean 注解上若不指定分组，则不会执行校验规则。
+```JAVA
+// 用于指定 添加数据 时的校验规则
+public interface AddGroup{
+    
+}
+// 用于指定 修改数据 时的校验规则
+public interface UpdateGroup{
+    
+}
+```
 
-（4）使用：  
-Step1：  
-　　创建分组接口。  
-　　创建两个分组接口 AddGroup、UpdateGroup。  
-其中：  
-　　AddGroup 用于指定 添加数据 时的校验规则（比如：id、name 均不为 null）。  
-　　UpdateGroup 用于指定 修改数据 时的校验规则（比如：name 不允许为 null）。
 
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428220659953-1043025088.png)
 
-Step2：  
-　　给 Bean 添加注解，并指定分组信息。
+### 第二步：给 Bean 添加注解，并指定分组信息
 
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
-
+```java
 @Data
 public class Emp implements Serializable {
     private static final long serialVersionUID = 281903912367009575L;
 
     @NotNull(message = "id 不能为 null", groups = {AddGroup.class})
     private Integer id;
-    
+
     @NotNull(message = "name 不能为 null", groups = {AddGroup.class, UpdateGroup.class})
     private String name;
-    
+
     private Double salary;
-    
+
     private Integer age;
-    
+
     private String email;
 }
+```
 
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
+### 第三步：在业务方法上，通过 @Validated 注解指定分组，去指定校验
 
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428220730408-871271181.png)
-
-Step3：  
-　　在业务方法上，通过 @Validated 注解指定分组，去指定校验。  
-如下例，定义两个方法，Post 请求会触发 createEmp 方法，Put 请求会触发 UpdateEmp 方法。
-
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
-
+```java
 @RestController
 @RequestMapping("api")
 public class EmpController {
@@ -326,32 +275,23 @@ public class EmpController {
     public Result createEmp(@Validated({AddGroup.class}) @RequestBody Emp emp) {
         return Result.ok().data("items", emp).message("数据插入成功");
     }
-    
+
     @PutMapping("/emp")
     public Result UpdateEmp(@Validated({UpdateGroup.class}) @RequestBody Emp emp) {
         return Result.ok().data("items", emp).message("数据插入成功");
     }
 }
+```
 
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
 
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428220808931-1573509150.png)
-
-Step4：  
-　　使用 Postman 测试，发送 Post 请求，触发 createEmp 方法，执行 AddGroup 校验规则。  
-　　检测 id、name 是否合法。
-
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428220833242-206922018.png)
-
-发送 Put 请求，触发 UpdateEmp 方法，执行 UpdateGroup 校验规则。  
-只检测 name 是否合法。
-
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428220851621-955072391.png)
 
 ## 4. JSR 303 自定义校验注解
 
-（1）为什么使用自定义校验注解？  
-　　上面的注解满足不了业务需求时，可以自定义校验注解，自定义校验规则。
+**为什么使用自定义校验注解？**
+
+上面的**注解满足不了业务需求**时，可以自定义校验注解，自定义校验规则。
+
+
 
 （2）步骤：  
 Step1：  
