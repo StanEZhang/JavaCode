@@ -2,28 +2,6 @@
 
 参数校验是每个后端开发都要面对的问题，很多同学包括我在内最拿手的就是if-else，但是这样校验会造成大量的代码冗余，今天就来学习如何**优雅**的校验参数。
 
-一、JSR 303
-
-1. 什么是 JSR 303？
-2. 为什么使用 JSR 303？
-3. JSR 303 常见操作？
-
-二、JSR303 的简单使用
-
-1. 未使用 JSR303 相关注解时
-2. 使用 JSR 303 相关注解处理逻辑
-3. JSR 303 分组校验
-4. JSR 303 自定义校验注解
-
-三、JSR 303 相关注解
-
-1. 空检查相关注解
-2. 长度检查
-3. 布尔值检查
-4. 日期检查
-5. 数值检查
-6. 其他
-
 # 一、JSR 303
 
 ## 1. 什么是 JSR 303？
@@ -291,33 +269,11 @@ public class EmpController {
 
 上面的**注解满足不了业务需求**时，可以自定义校验注解，自定义校验规则。
 
+### 第一步：自定义一个校验注解
 
+自定义一个校验注解，@TestValid，用于判断一个值的长度是否合法。
 
-（2）步骤：  
-Step1：  
-　　需要自定义一个校验注解。  
-　　可以创建一个 ValidationMessages.properties 用于保存默认的 message 信息。
-
-Step2：  
-　　需要自定义一个校验器，即自定义校验规则。  
-　　实现 ConstraintValidator 接口，并重写相关方法。  
-注：  
-　　initialize 方法用于初始化，可以获取 自定义的属性的值。  
-　　isValid 方法用于校验，可以获取到实际的值，然后与自定义的属性值进行比较。
-
-Step3：  
-　　将校验注解 与 校验器 关联起来。  
-　　@Constraint(validatedBy = {TestValidConstraintValidator.class})
-
-（3）使用：  
-　　如下例，自定义一个校验规则，判断数据长度是否合法。  
-　　默认为 String 属性，当 String 为 Null 或者 长度大于 5 时，校验不通过。  
-　　可以自定义 长度。  
-Step1：  
-　　自定义一个校验注解，@TestValid，用于判断一个值的长度是否合法。
-
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
-
+```java
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.Documented;
@@ -347,20 +303,19 @@ public @interface TestValid {
      */
     int length() default 5;
 }
+```
 
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
+其中的 message 错误信息可以从 ValidationMessages.properties 配置文件中获取。
 
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428221002972-1522900393.png)
+```properties
+com.lyh.test.TestValid.message="值不能为bull,且长度不超过5"
+```
 
-配置文件内容：
 
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428221026759-1034572389.png)
 
-Step2：  
-　　自定义一个校验器TestValidConstraintValidator， 用于检测值是否合法。
+### 第二步：自定义一个校验器，即自定义校验规则
 
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
-
+```java
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
@@ -401,109 +356,84 @@ public class TestValidConstraintValidator implements ConstraintValidator<TestVal
     }
 
 }
+```
 
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
 
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428221059503-1784934043.png)
 
-Step3：  
-　　使用注解。
+### 第三步：使用注解
 
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
-
+```java
 @Data
 public class Emp implements Serializable {
     private static final long serialVersionUID = 281903912367009575L;
 
     @NotNull(message = "id 不能为 null", groups = {AddGroup.class})
     private Integer id;
-    
+
     @TestValid(groups = {AddGroup.class})
     @NotNull(message = "name 不能为 null", groups = {AddGroup.class, UpdateGroup.class})
     private String name;
-    
+
     private Double salary;
-    
+
     private Integer age;
-    
+
     @TestValid(length = 10, message = "值不能为 Null 且长度不超过 10", groups = {AddGroup.class})
     private String email;
 }
+```
 
-![复制代码](https://common.cnblogs.com/images/copycode.gif)
 
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428221128574-1686056794.png)
-
-使用 Postman 测试。  
-　　name、email 都不存在时，会被捕获数据异常。
-
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428221149251-253160472.png)
-
-name 数据不合法、email 数据合法时，name 会被捕获。
-
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428221208335-1658883014.png)
-
-[回到顶部](https://www.cnblogs.com/l-y-h/p/12797809.html#_labelTop)
 
 # 三、JSR 303 相关注解
 
 ## 1. 空检查相关注解
 
-注解                      注解详情
+```
+注解                     注解详情
 @Null                  被指定的注解元素必须为 Null
 @NotNull               任意类型，不能为 Null，但可以为空，比如空数组、空字符串。
 @NotBlank              针对字符串，不能为 Null，且去除前后空格后的字符串长度要大于 0。
-@NotEmpty              针对字符串、集合、数组，不能为 Null，且长度要大于 0。
-
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428221244513-1199262758.png)
-
- ![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428221253845-155128042.png)
-
- ![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428221306284-1971402416.png)
-
- ![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428221317666-1025417813.png)
+@NotEmpty              针对字符串、集合、数组，不能为 Null，且长度要大于 0。	
+```
 
 ## 2. 长度检查
 
+```
 注解                      注解详情
 @Size                   针对字符串、集合、数组，判断长度是否在给定范围内。
 @Length                 针对字符串，判断长度是否在给定范围内。
-
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428221348047-939675330.png)
-
- ![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428221358934-344311630.png)
+```
 
 ## 3. 布尔值检查
 
+```
 注解                      注解详情
 @AssertTrue             针对布尔值，用来判断布尔值是否为 true
 @AssertFalse            针对布尔值，用来判断布尔值是否为 false
-
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428221422911-1509136310.png)
-
- ![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428221432142-1773810964.png)
+```
 
 ## 4. 日期检查
 
-注解                      注解详情
+```
+注解                     注解详情
 @Past                  针对日期，用来判断当前日期是否为 过去的日期
 @Future                针对日期，用来判断当前日期是否为 未来的日期
+```
 
 ## 5. 数值检查
 
-注解                      注解详情
+```
+注解                  注解详情
 @Max(value)         针对字符串、数值，用来判断是否小于等于某个指定值
 @Min(value)         针对字符串、数值，用来判断是否大于等于某个指定值
-
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428221518142-1724792311.png)
-
- ![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428221530432-20587502.png)
+```
 
 ## 6. 其他
 
-注解                      注解详情
+```java
+注解                   注解详情
 @Pattern             验证字符串是否满足正则表达式
 @Email               验证字符串是否满足邮件格式
 @Url                 验证是否满足 url 格式
-
-![](https://img2020.cnblogs.com/blog/1688578/202004/1688578-20200428221558414-652453741.png)
+```
