@@ -115,53 +115,32 @@ Weekday y = Color.RED; // Compile error: incompatible types
 
 # 五、应用场景
 
-> 根据Java中使用枚举类的规则，有以下几种场景适合来使用枚举类，如下：
->
-> - **星期：** Monday（星期一）、Tuesday（星期二）、Wednesday（星期三）、Thursday（星期四）、Firday（星期五）、Saturday（星期六）、Sunday（星期日）
-> - **性别：** Man（男）、Woman（女）
-> - **季节：** Spring（春天）、Summer（夏天）、Autumn（秋天）、Winter（冬天）
-> - **支付方式：** Cash（现金）、WeChatPay（微信）、Alipay（支付宝）、BankCard（银行卡）、CreditCard（信用卡）
-> - **订单状态：** Nonpayment（未付款）、Paid（已付款）、Fulfilled（已配货）、Delivered（已发货）、Return（退货）、Checked（已确认）
-> - **线程状态：** Establish（创建）、Ready（就绪）、Run（运行）、Obstruct（阻塞）、Die（死亡）
-> - 等等......
+- **星期：** Monday（星期一）、Tuesday（星期二）、Wednesday（星期三）、Thursday（星期四）、Firday（星期五）、Saturday（星期六）、Sunday（星期日）
+- **性别：** Man（男）、Woman（女）
+- **季节：** Spring（春天）、Summer（夏天）、Autumn（秋天）、Winter（冬天）
+- **支付方式：** Cash（现金）、WeChatPay（微信）、Alipay（支付宝）、BankCard（银行卡）、CreditCard（信用卡）
+- **订单状态：** Nonpayment（未付款）、Paid（已付款）、Fulfilled（已配货）、Delivered（已发货）、Return（退货）、Checked（已确认）
+- **线程状态：** Establish（创建）、Ready（就绪）、Run（运行）、Obstruct（阻塞）、Die（死亡）
+- 等等......
 
 
 
-# 四、枚举类的基本使用步骤解析
+# 六、枚举类的使用步骤
 
-那我们就解释以下这两个规则，我们在上述中已经了解了枚举的作用。Java中枚举也不例外，也是一一列举出来方便我们拿出来一个或多个使用。这有点像我们的多选框，我们把需要用到的所有选项内容放在各个多选框后面，当我们在使用的时候只需要勾选自己需要的勾选框即可，这就代表了我们需要被选中多选框后面的内容。
-
-*那么，Java中的枚举类是如何使用呢？* 
-
-这里我们简单的模拟一个场景，假设你的女朋友十分的喜欢喝点冷饮或热奶茶之类的饮品，在生活中也有很多像蜜雪冰城等等这种类型的饮品店。当你为女朋友买她爱喝的珍珠奶茶时，服务员会问你，要大杯、中杯还是小杯的。当然，为了满足女朋友，你通常会选择大杯。这就意味着店内不允许顾客点规则外的饮品。
-
-**注意：** 如果你是初学者或是不了解枚举类的使用，此基本使用不懂没有关系，请继续往下看即可！
-
-*于是，我用Java代码来实现一下，上述场景。* 
-
-首先，创建枚举类。分别为珍珠奶茶添加大、中、小杯杯型。
+我们以奶茶的大、中、小杯为三种杯型创建枚举类。
 
 ```java
 /**
- * @ClassName PearlMilkTea
- * @Description 为珍珠奶茶添加三个杯型：大、中、小
+ * 为珍珠奶茶添加三个杯型：大、中、小
  */
 public enum PearlMilkTea {
-    //注意：这里枚举类中只有枚举成员,我在此省略了;结束符
     SMALL, MEDIUM, LARGE
 }
 ```
 
-其次，创建珍珠奶茶对象，再有方法来判断枚举类中的大、中、小杯。最后打印女朋友喝哪个杯型的珍珠奶茶！
+其次，创建珍珠奶茶对象，再有方法来判断枚举类中的大、中、小杯。
 
 ```java
-import com.bin.java.PearlMilkTea;
-
-/**
- * @ClassName PearlMilkTeaTest
- * @Description 为女朋友买哪个杯型的珍珠奶茶(默认大杯)
- * @Since 1.8
- */
 public class PearlMilkTeaTest {
     public static void main(String[] args) {
         //创建大杯的珍珠奶茶对象
@@ -169,110 +148,23 @@ public class PearlMilkTeaTest {
         PearlMilkTeaTest.drinkSize(pearlMilkTea);
     }
 
-    //判断为女朋友买哪个杯型的珍珠奶茶
     public static void drinkSize(PearlMilkTea pearlMilkTea) {
         if (pearlMilkTea == PearlMilkTea.LARGE) {
-            System.out.println("我为女朋友买了一大杯珍珠奶茶！");
+            System.out.println("买了大杯珍珠奶茶！");
         } else if (pearlMilkTea == PearlMilkTea.MEDIUM) {
-            System.out.println("我为女朋友买了一中杯珍珠奶茶！");
+            System.out.println("买了中杯珍珠奶茶！");
         } else {
-            System.out.println("我为女朋友买了一小杯珍珠奶茶！");
+            System.out.println("买了小杯珍珠奶茶！");
         }
     }
 }
 ```
 
-虽然，我们了解了枚举类中的基本使用，但是我们在语法中还介绍了一种在类中定义的枚举。正好，在此也演示一下。如下：
+
+
+# 七、有参枚举类
 
 ```java
-public class PearlMilkTea {
-    enum DrinkSize {
-        SMALL,
-        MEDIUM, 
-        LARGE
-    }
-}
-```
-
-如果这样创建就可以在class类中去创建enum枚举类了。想想前面例子中的代码其实并不合理，这是为什么呢？因为我们写代码要遵循单一职责原则和见命知意的命名规范。所以，我写的代码是在珍珠奶茶的枚举类中列举的大、中、小的三种杯型枚举成员。所以根据规范来讲，我们珍珠奶茶中不能拥有杯型相关的枚举，毕竟我们在生活中的这类饮品店中喝的所有饮品种类都有这三种杯型，因此我们的所有饮品种类中都需要写一个枚举类，显然这是很不合理的。
-
-如果让它变的更加合理化，我们就细分饮品种类来创建饮品枚举类和杯型的枚举类并分别两两适用即可。也许有小伙伴会问我为什么我要说这些合理不合理呢？因为自我感觉这是对枚举类应用的思想铺垫，所以你品、你细品！
-
-
-
-# 五、自定义枚举类
-
-## 5.1 自定义枚举类步骤
-
-> 关于第四章枚举类的基本使用，也许小伙伴们对枚举的陌生，而并不知道为什么这样去创建枚举对象。接下来，我来带你使用常量来自定义枚举类，试试是不是那个效果。
-
-既然，上述第三章我举出了这么多枚举类的应用场景，那我们挑选一个比较经典的春夏秋冬来实现自定义枚举类。
-
-首先，我们先创建一个季节类，分别提供属性、私有构造器、春夏秋冬常量、Getter方法和toString方法，步骤如下：
-
-```java
-/**
- * 自定义季节的枚举类
- */
-public class Season {
-    //声明Season对象的属性,为private final修饰
-    private final String seasonName;
-
-    //私有化构造器,并为对象赋值
-    private Season(String seasonName) {
-        this.seasonName = seasonName;
-    }
-
-    //提供当前枚举的多个对象,为public static final修饰
-    public static final Season SPRING = new Season("春天");
-    public static final Season SUMMER = new Season("夏天");
-    public static final Season AUTUMN = new Season("秋天");
-    public static final Season WINTER = new Season("冬天");
-
-    //提供外界通过getter方法来获取枚举对象的属性
-    public String getSeasonName() {
-        return seasonName;
-    }
-
-    //重写toString方法,以便打印出枚举结果
-    @Override
-    public String toString() {
-        return "Season{" +
-                "seasonName='" + seasonName + '\'' +
-                '}';
-    }
-}
-```
-
-其次，我们去创建一个测试类，来使用该自定义枚举类创建对象。由此看来，我们就可以根据类名来句点出常量对象了！
-
-```java
-/**
- * 测试类
- */
-public class SeasonTest {
-    public static void main(String[] args) {
-        Season spring = Season.SPRING;
-        System.out.println(spring);
-    }
-}
-```
-
-最后打印结果是春天的对象，由于我们覆盖了toString方法，即可见对象内的内容。
-
-![image-20200608160220000](Enum枚举类看这一篇就够了！.assets/20200608160222.png)
-
-
-
-## 5.2 使用带有参枚举类
-
-> 如果你在第三章时Java枚举类的基本使用不明白，估计看完自定义枚举类也了解的大差不差了。但是你有没有发现我们自定义枚举类是使用的有参数的对象呢？那我们怎样使用真正的枚举类来实现有参数的枚举类呢？继续看吧那就！
-
-在这里我将自定义枚举类改装了一下，改装成了enum枚举类实现的使用有参对象。如下：
-
-```java
-package com.mylifes1110.java;
-
 public enum Season {
     SPRING("春天"),
     SUMMER("夏天"),
@@ -291,18 +183,10 @@ public enum Season {
 }
 ```
 
-不知道你有没有发现少了点什么，少的部分其实就是我们创建常量对象的部分，而且在这个枚举类中我也没有去重写toString方法，至于为什么，下面就告诉你。
-
-**注意：** 枚举对象之间用`,`隔开！
-
-其次，去创建了该枚举类的测试类，我们测试以下，并看一下没有重写toString方法打印出来的结果。
+创建了该枚举类的测试类：
 
 ```java
-package com.mylifes1110.test;
-
-import com.mylifes1110.java.Season;
-
-public class Seaso1Test {
+public class SeasonTest {
     public static void main(String[] args) {
         Season1 spring = Season.SPRING;
         System.out.println(spring);                     //SPRING
@@ -311,39 +195,13 @@ public class Seaso1Test {
 }
 ```
 
-这里我将打印的结果放在了打印语句后面的注释中。我们发现没有重写toString方法竟然打印出来的是SPRING，这是为什么呢？这应该从我们的继承关系中分析，如果继承的是基类Object的话，没有重写toString方法会打印对象地址。那么我们就可以断定，enum枚举类的父类不是Object。那它的父类是谁呢？我们可以借助来对象来获取其父类，如下：
-
-```java
-System.out.println(Season.class.getSuperclass());		//class java.lang.Enum
-```
-
-同样，答案放在了代码后面的注释中。我们发现它默认继承的是Enum类。那么，我们稍后就来就看看这个类中到底写了些什么方法。
 
 
+# 八、Enum常用方法的使用
 
-# 六、Enum常用方法的使用
+## 8.1 name()和toString()
 
-## 6.1 Enum中的所有方法
-
-> 关于Enum类中的所有方法我以表格的方式列举出来！
-
-| 返回值                        | 方法                                     | 描述                                        |
-| ----------------------------- | ---------------------------------------- | ------------------------------------------- |
-| String                        | name()                                   | 获取枚举成员的名称                          |
-| static <T extends Enum\<T>> T | valueOf(Class\<T> enumType, String name) | 获取指定枚举成员名称和类型的枚举成员        |
-| String[]                      | values()                                 | 获取枚举成员的所有值                        |
-|                               |                                          |                                             |
-| int                           | compareTo(E o)                           | 比较此枚举与指定对象的顺序                  |
-| int                           | hashCode()                               | 获取枚举成员的哈希值                        |
-| int                           | ordinal()                                | 获取枚举成员的序数（第一个枚举成员位置为0） |
-| String                        | toString()                               | 返回枚举成员名称                            |
-| Class\<E>                     | getDeclaringClass()                      | 获取枚举成员的类对象                        |
-
-
-
-## 6.2 name和toString
-
-> 关于name方法和toString方法，其实很简单。name()就是根据枚举成员来获取该枚举成员的字符串名称。而同String方法也是用来获取枚举成员的字符串名称。虽然作用都是相同的，但是name方法是用final修饰的不能被重写，而toString是可以被重写的。这里我们还使用季节的案例来演示，打印结果并放在了代码后面的注释中，如下：
+name()就是根据枚举成员来获取该枚举成员的字符串名称。而同String方法也是用来获取枚举成员的字符串名称。
 
 ```java
 System.out.println(Season.SUMMER.name());			//SUMMER
@@ -352,22 +210,20 @@ System.out.println(Season.SUMMER.toString());		//SUMMER
 
 
 
-## 6.3 valueOf
+## 8.2 valueOf()
 
-> 此方法的作用是**传入一个字符串，然后将它转换成对应的枚举成员**。这里传入的字符串必须与定义的枚举成员的名称一致，严格区分大小写。如果传入的字符串并没有找到其对应的枚举成员对象，就会抛出异常。如下：
+根据枚举成员名称获取枚举成员。
 
 ```
 System.out.println(Season.valueOf("WINTER"));			//WINTER
 System.out.println(Season.valueOf("WIN"));				//java.lang.IllegalArgumentException
 ```
 
-![image-20200608173858862](Enum枚举类看这一篇就够了！.assets/20200608173901.png)
 
 
+## 8.3 values
 
-## 6.4 values
-
-> values方法的名字中就带有一个s，再加上它的返回值是一个字符串数组。所以我们就可以得出它的作用是获取枚举成员的所有值，这些值并以数组的形式存储。
+获取枚举成员的所有值，这些值并以数组的形式存储。
 
 ```java
 Season[] seasons = Season.values();
@@ -384,7 +240,7 @@ SPRING SUMMER AUTUMN WINTER
 
 
 
-## 6.5 ordinal
+## 8.4 ordinal
 
 > 该方法是获取枚举成员的序数，其第一个枚举成员位置为0。其实，为了好理解的话，可以把它看作数组中的索引。数组中的第一个元素位置同样也是从0开始。那我们打印一下，看看结果如何，如下：
 
