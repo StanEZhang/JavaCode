@@ -239,9 +239,7 @@ public class Result {
 
 ## 第三步：HttpStatus 状态码
 
-```
-http://hc.apache.org/httpcomponents-core-ga/httpcore/apidocs/org/apache/http/HttpStatus.html
-```
+[[]]
 
  
 
