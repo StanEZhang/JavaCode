@@ -1,12 +1,12 @@
 学习 SpringBoot 自动配置之前我们需要一些前置知识点：
 
-Java注解，看完就会用√
+[[Java注解，看完就会用]]
 
-学会@ConfigurationProperties月薪过三千√
+[[@ConfigurationProperties注解]]
 
-@import√
+[[@Import注解]]
 
-@Conditional√
+[[@Conditional注解]]
 
 ---
 
