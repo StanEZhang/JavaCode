@@ -1,19 +1,12 @@
 学习 SpringBoot 自动配置之前我们需要一些前置知识点：
-
 [[Java注解，看完就会用]]
-
 [[@ConfigurationProperties注解]]
-
 [[@Import注解]]
-
 [[@Conditional注解]]
 
 ---
-
 首先我们提出2个问题：
-
 **SpringBoot 是干什么的？**
-
 是用来简化 Spring 原生的复杂的 xml 配置的进阶框架。
 
 **自动配置是什么？**
