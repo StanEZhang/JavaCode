@@ -202,6 +202,8 @@ tims系统修改人员信息中的姓名和手机号时，要将这两个信息�
 
 mc模块有3个节点。
 
+
+
 ### 3.对接易点进行统一登录认证
 
 OAuth 2.0
@@ -222,7 +224,11 @@ OAuth 2.0
 
 2.获取token接口（getToken）:ip:8080/idp/oauth2/getToken
 
-再拿到access_token，根据这个access_token作为参数继续发送请求，请求易点中**获取用户信息的接口**，然后拿到我们最终需要的用户信息，登录监测系统。
+该接口正确返回一个access_token.
+
+3.获取用户信息接口（getUserInfo）:ip:8080/idp/oauth2/getUserInfo
+
+根据这个access_token作为参数继续发送请求，请求易点中**获取用户信息的接口**，然后拿到我们最终需要的用户信息，登录监测系统。
 
 
 
