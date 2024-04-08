@@ -218,6 +218,12 @@ OAuth 2.0
 
 跳转的同时code和state(如果有的话)会跟在回调地址上作为参数，如redirect_uri?code=xxx&state=xxx
 
+拿着这个code我们在应用接口中继续请求易点中**获取token的接口**。
+
+2.获取token接口（getToken）:ip:8080/idp/oauth2/getToken
+
+再拿到access_token，根据这个access_token作为参数继续发送请求，请求易点中**获取用户信息的接口**，然后拿到我们最终需要的用户信息，登录监测系统。
+
 
 
 ## 六、其他个人项目
