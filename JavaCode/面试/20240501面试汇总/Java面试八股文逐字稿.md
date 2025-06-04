@@ -21,7 +21,7 @@
 ## StringBuffer和StringBuilder
 
 首先要知道String是不可变的（因为内部的Storage是字符数组，它被final修饰），而StringBuffer和StringBuilder是可变的，它们的内部也是字符数组，同样继承了AbstractStringBuilder，但是没有被final修饰。
-
+如
 他们俩的主要区别就是StringBuffer在它的方法中都加了synchronized关键字，也就是StringBuffer是线程安全的。
 
 而正是因为synchronized的存在导致了它的性能会差一些。所以开发使用中就根据实际情况来决定用哪个。
